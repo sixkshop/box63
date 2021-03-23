@@ -5,7 +5,7 @@ import 'package:Sixk_Control/pages/rotation.dart';
 import 'package:Sixk_Control/pages/time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-
+//test1
 void main() {
   runApp(
       MyApp());
