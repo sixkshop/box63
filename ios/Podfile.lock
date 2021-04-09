@@ -1,0 +1,51 @@
+PODS:
+  - "app_settings (3.0.0+1)":
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_reactive_ble (0.0.1):
+    - Flutter
+    - Protobuf (~> 3.5)
+    - SwiftProtobuf (~> 1.0)
+  - "location_permissions (3.0.0+1)":
+    - Flutter
+  - "permission_handler (5.1.0+2)":
+    - Flutter
+  - Protobuf (3.14.0)
+  - SwiftProtobuf (1.15.0)
+
+DEPENDENCIES:
+  - app_settings (from `.symlinks/plugins/app_settings/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_reactive_ble (from `.symlinks/plugins/flutter_reactive_ble/ios`)
+  - location_permissions (from `.symlinks/plugins/location_permissions/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Protobuf
+    - SwiftProtobuf
+
+EXTERNAL SOURCES:
+  app_settings:
+    :path: ".symlinks/plugins/app_settings/ios"
+  Flutter:
+    :path: Flutter
+  flutter_reactive_ble:
+    :path: ".symlinks/plugins/flutter_reactive_ble/ios"
+  location_permissions:
+    :path: ".symlinks/plugins/location_permissions/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
+
+SPEC CHECKSUMS:
+  app_settings: d103828c9f5d515c4df9ee754dabd443f7cedcf3
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  flutter_reactive_ble: ac0ccac596f481b221549cad2abe16987e1f411b
+  location_permissions: 7e0f9aa0f60deb8ff93ddf0e2a164c7e8197bc94
+  permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
+  Protobuf: 0cde852566359049847168e51bd1c690e0f70056
+  SwiftProtobuf: 3320217e9d8fb75f36b40282e78c482640fd75dd
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.10.1
