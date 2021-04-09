@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'dart:async';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-
+import 'package:Sixk_Control/pages/globals.dart' as globals;
 // import 'package:location_permissions/location_permissions.dart';
 // import 'package:system_setting/system_setting.dart';
 import 'dart:io' show Platform;
@@ -52,7 +52,8 @@ class _HomePageState extends State<HomePage> {
     // _disconnect();
     // _startScan();
     // _checkBluetoothLocation();
-    Future.delayed(const Duration(milliseconds: 2000), () { // delay แก้ bug alert bluetooth โผล่ตอนแรก
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      // delay แก้ bug alert bluetooth โผล่ตอนแรก
       checkBluetooth();
       firstCheckLocation();
     });
@@ -182,7 +183,7 @@ class _HomePageState extends State<HomePage> {
         if (_foundBleUARTDevices.every((element) => element.id != device.id)) {
           _foundBleUARTDevices.add(device);
           cardArray.add(device.name);
-
+          print("FOUNDED device id=$device");
           refreshScreen();
         }
       }, onError: (Object error) {
@@ -204,7 +205,7 @@ class _HomePageState extends State<HomePage> {
       prescanDuration: Duration(seconds: 1),
       withServices: [_UART_UUID, _UART_RX, _UART_TX],
     );
-
+    print("_currentConnectionStream=$_currentConnectionStream");
     _logTexts = "";
     // refreshScreen();
     _connection = _currentConnectionStream.listen((event) {
@@ -225,20 +226,21 @@ class _HomePageState extends State<HomePage> {
             _numberOfMessagesReceived = 0;
             _receivedData = [];
             _txCharacteristic = QualifiedCharacteristic(
-                serviceId: _UART_UUID,
-                characteristicId: _UART_TX,
+                serviceId: Uuid.parse("FFE0"),
+                characteristicId: Uuid.parse("FFE1"),
                 deviceId: event.deviceId);
-            _receivedDataStream =
-                flutterReactiveBle.subscribeToCharacteristic(_txCharacteristic);
-            _receivedDataStream.listen((data) {
-              // onNewReceivedData(data);
-              // print(String.fromCharCodes(data));
-            }, onError: (dynamic error) {
-              _logTexts = "${_logTexts}Error:$error$id\n";
-            });
+            // _receivedDataStream =
+            //     flutterReactiveBle.subscribeToCharacteristic(_txCharacteristic);
+            // _receivedDataStream.listen((data) {
+            //   // onNewReceivedData(data);
+            //   print("INRE = ${String.fromCharCodes(data)}");
+            // }, onError: (dynamic error) {
+            //   print("INRE ERROR = $error");
+            //   _logTexts = "${_logTexts}Error:$error$id\n";
+            // });
             _rxCharacteristic = QualifiedCharacteristic(
-                serviceId: _UART_UUID,
-                characteristicId: _UART_RX,
+                serviceId: Uuid.parse("FFE0"),
+                characteristicId: Uuid.parse("FFE1"),
                 deviceId: event.deviceId);
 
             // argsSend = [cardArray[index],_rxCharacteristic];
@@ -247,17 +249,40 @@ class _HomePageState extends State<HomePage> {
             // _stopScan();
 
             Navigator.pushNamed(context, "/device_setting_page",
-                arguments: argsSend)
+                    arguments: argsSend)
                 .then((value) {
+              cardArray =[];
               EasyLoading.dismiss();
               onceTimeSend = true;
-              waitSSFinish = true;
+
+              print("Re ${globals.motorStatus}");
+              if(globals.motorStatus=="off"){
+                _sendData("6");
+
+
+
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  waitSSFinish = false;
+                  _disconnect();
+                  _startScan();
+                });
+
+              }else{
+                waitSSFinish = true;
+                _receiveData(globals.args);
+                Future.delayed(const Duration(milliseconds: 200), () {
+                  _sendData("8");
+                });
+              }
+
               refreshScreen();
-              _sendData("4");
 
-              _receiveData(argsSend);
 
-              _startScan();
+
+
+
+
+
             });
             break;
           }
@@ -295,9 +320,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _receiveData(args) async {
+    print("iosTEST-1");
     _txCharacteristic = QualifiedCharacteristic(
-        serviceId: _UART_UUID,
-        characteristicId: _UART_TX,
+        serviceId: Uuid.parse("FFE0"),
+        characteristicId: Uuid.parse("FFE1"),
         deviceId: args.deviceId);
     _receivedDataStream =
         flutterReactiveBle.subscribeToCharacteristic(_txCharacteristic);
@@ -313,38 +339,48 @@ class _HomePageState extends State<HomePage> {
       print("data=$s");
       // var parts = s.split(',');
       // if(parts[2].trim()==)
-      if ((data.toString() ==
-          "[109, 64, 111, 102, 102, 44, 97, 99, 44, 48, 13, 10]") ||
-          (data.toString() ==
-              "[109, 64, 111, 102, 102, 44, 99, 99, 44, 48, 13, 10]")) {
-        //off
-        print("OFF1");
-        if (onceTimeSend) {
-          print("OFF2");
-          _sendData("6");
-          onceTimeSend = false;
-          waitSSFinish = false;
-          Future.delayed(const Duration(milliseconds: 500), () {
-            _disconnect();
-          });
 
-          subscription.cancel();
-        }
-      } else {
-        print("OFF3");
-        if (onceTimeSend) {
-          print("OFF4");
-          _sendData("8");
-          onceTimeSend = false;
-        }
-      }
-      if (data.toString() ==
-          "[115, 115, 70, 105, 110, 105, 115, 104, 13, 10]") {
+
+      // if ((data.toString() ==
+      //         "[109, 64, 111, 102, 102, 44, 97, 99, 44, 48, 13, 10]") ||
+      //     (data.toString() ==
+      //         "[109, 64, 111, 102, 102, 44, 99, 99, 44, 48, 13, 10]")) {
+      //   //off
+      //   print("OFF1");
+      //   if (onceTimeSend) {
+      //     print("OFF2");
+      //     _sendData("6");
+      //     onceTimeSend = false;
+      //     waitSSFinish = false;
+      //     Future.delayed(const Duration(milliseconds: 500), () {
+      //       _disconnect();
+      //     });
+      //
+      //     subscription.cancel();
+      //   }
+      // } else {
+      //   print("OFF3");
+      //   if (onceTimeSend) {
+      //     print("OFF4");
+      //     _sendData("8");
+      //     onceTimeSend = false;
+      //   }
+      // }
+
+
+
+
+      // if (data.toString() ==
+      //     "[115, 115, 70, 105, 110, 105, 115, 104, 13, 10]") {
+
+        if ((data.toString().indexOf("115, 115, 70, 105, 110, 105, 115, 104") == 1) || (data.toString().indexOf("115, 24, 15, 22, 110, 105, 115, 104, 13, 10") == 1)){// แก้บีคปิด recievedata หน้า  device page ไม่ได้ ทำให้รับข้อมูลซ้อนกัน
         //ssFinish
         waitSSFinish = false;
         print('$s' + '$waitSSFinish');
         _disconnect();
         subscription.cancel();
+        refreshScreen();
+        _startScan();
       }
       // _startScan();
       // refreshScreen();
@@ -363,11 +399,11 @@ class _HomePageState extends State<HomePage> {
       ..maskType = EasyLoadingMaskType.black
       ..indicatorSize = 45.0
       ..radius = 10.0
-    // ..progressColor = Colors.yellow
+      // ..progressColor = Colors.yellow
       ..backgroundColor = Colors.green
-    // ..indicatorColor = Colors.yellow
-    // ..textColor = Colors.yellow
-    // ..maskColor = Colors.blue.withOpacity(0.5)
+      // ..indicatorColor = Colors.yellow
+      // ..textColor = Colors.yellow
+      // ..maskColor = Colors.blue.withOpacity(0.5)
       ..userInteractions = false
       ..dismissOnTap = false;
     if (waitSSFinish) {
@@ -412,160 +448,155 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.location_pin),
             onPressed: () {
               AppSettings.openLocationSettings();
-
             }),
       );
     } else {
       return Scaffold(
-        // backgroundColor: Color(0xFFF1F1F1),
-        // appBar: AppBar(
-        //   title: Text("title text"),
-        // ),
+          // backgroundColor: Color(0xFFF1F1F1),
+          // appBar: AppBar(
+          //   title: Text("title text"),
+          // ),
           body: SafeArea(
-            child: Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.fromLTRB(20, 15, 20, 10),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Select your device.",
-                        style: TextStyle(
-                          // color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                      // Text(
-                      //   waitSSFinish.toString(),
-                      //   style: TextStyle(
-                      //     color: Colors.black,
-                      //     fontSize: 20,
-                      //   ),
-                      // ),
-                      // RaisedButton(
-                      //   onPressed: !_scanning && !_connected ? _startScan : () {},
-                      //   child: Icon(
-                      //     Icons.play_arrow,
-                      //     color: !_scanning && !_connected
-                      //         ? Colors.blue
-                      //         : Colors.grey,
-                      //   ),
-                      // ),
-                      // RaisedButton(
-                      //     onPressed: _disconnect,
-                      //     child: Icon(
-                      //       Icons.stop,
-                      //       color: _scanning ? Colors.blue : Colors.grey,
-                      //     )),
-                    ],
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.fromLTRB(20, 15, 20, 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Select your device.",
+                    style: TextStyle(
+                      // color: Colors.black,
+                      fontSize: 20,
+                    ),
                   ),
-                ),
-                Flexible(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
-                    child: ListView.builder(
-                        itemCount: cardArray.length,
-                        // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        //     crossAxisCount: 1,
-                        //     childAspectRatio: 6 / 2,
-                        //     crossAxisSpacing: 5,
-                        //     mainAxisSpacing: 5),
-                        itemBuilder: (ctx, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              EasyLoading.show(status: 'Connecting...');
-                              _stopScan();
-                              onConnectDevice(index);
+                  // Text(
+                  //   waitSSFinish.toString(),
+                  //   style: TextStyle(
+                  //     color: Colors.black,
+                  //     fontSize: 20,
+                  //   ),
+                  // ),
+                  // RaisedButton(
+                  //   onPressed: !_scanning && !_connected ? _startScan : () {},
+                  //   child: Icon(
+                  //     Icons.play_arrow,
+                  //     color: !_scanning && !_connected
+                  //         ? Colors.blue
+                  //         : Colors.grey,
+                  //   ),
+                  // ),
+                  // RaisedButton(
+                  //     onPressed: _disconnect,
+                  //     child: Icon(
+                  //       Icons.stop,
+                  //       color: _scanning ? Colors.blue : Colors.grey,
+                  //     )),
+                ],
+              ),
+            ),
+            Flexible(
+              child: Container(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
+                child: ListView.builder(
+                    itemCount: cardArray.length,
+                    // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    //     crossAxisCount: 1,
+                    //     childAspectRatio: 6 / 2,
+                    //     crossAxisSpacing: 5,
+                    //     mainAxisSpacing: 5),
+                    itemBuilder: (ctx, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          EasyLoading.show(status: 'Connecting...');
+                          _stopScan();
+                          onConnectDevice(index);
 
-                              // arguments: _logTexts);
-                            },
-                            child: Card(
-
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(2.0),
-                              ),
-                              elevation: 2,
-                              child: Container(
-                                padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                          // arguments: _logTexts);
+                        },
+                        child: Card(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2.0),
+                          ),
+                          elevation: 2,
+                          child: Container(
+                            padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                  child: Image.asset(
+                                    "img/boxIcon.png",
+                                    width:
+                                        MediaQuery.of(context).size.width / 6,
+                                  ),
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                      child: Image.asset(
-                                        "img/boxIcon.png",
-                                        width:
-                                        MediaQuery.of(context).size.width /
-                                            6,
-                                      ),
-                                    ),
-                                    Column(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                            padding: EdgeInsets.fromLTRB(
-                                                10, 8, 0, 0),
-                                            child: Text(
-                                              cardArray[index],
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14,
-                                              ),
-                                            )),
-                                        Container(
-                                            padding: EdgeInsets.fromLTRB(
-                                                10, 1, 0, 0),
-                                            child: Text(
-                                              "Ready",
-                                              style: TextStyle(
-                                                color: Colors.green,
-                                                fontSize: 12,
-                                              ),
-                                            )),
-                                      ],
-                                    ),
+                                        padding:
+                                            EdgeInsets.fromLTRB(10, 8, 0, 0),
+                                        child: Text(
+                                          cardArray[index],
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                          ),
+                                        )),
+                                    Container(
+                                        padding:
+                                            EdgeInsets.fromLTRB(10, 1, 0, 0),
+                                        child: Text(
+                                          "Ready",
+                                          style: TextStyle(
+                                            color: Colors.green,
+                                            fontSize: 12,
+                                          ),
+                                        )),
                                   ],
                                 ),
-                              ),
+                              ],
                             ),
-                          );
-                        }),
-                  ),
-                ),
-                Container(
-                    padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                    child: Column(
-                      children: [
-                        Visibility(
-                          child: Column(
-                            children: [
-                              CircularProgressIndicator(),
-                              Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Text("Searching device...",
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                      ))),
-                              Text("version:1.0.0",
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ),
+            Container(
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                child: Column(
+                  children: [
+                    Visibility(
+                      child: Column(
+                        children: [
+                          CircularProgressIndicator(),
+                          Container(
+                              padding: EdgeInsets.all(10),
+                              child: Text("Searching device...",
                                   style: TextStyle(
                                     color: Colors.grey,
-                                    fontSize: 10,
-                                  )),
-                            ],
-                          ),
-                          visible: scanningVisible,
-                        ),
-                      ],
-                    )),
-              ],
-            ),
-          ));
+                                  ))),
+                          Text("version:1.0.0",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 10,
+                              )),
+                        ],
+                      ),
+                      visible: scanningVisible,
+                    ),
+                  ],
+                )),
+          ],
+        ),
+      ));
     }
   }
 }

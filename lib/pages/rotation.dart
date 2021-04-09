@@ -58,9 +58,10 @@ class _RatationPageState extends State<RotaionPage> {
   }
 
   void _receiveData(args) async {
+    print("ROTATION RECIEVE");
     _txCharacteristic = QualifiedCharacteristic(
-        serviceId: _UART_UUID,
-        characteristicId: _UART_TX,
+        serviceId: Uuid.parse("FFE0"),
+        characteristicId: Uuid.parse("FFE1"),
         deviceId: args.deviceId);
     _receivedDataStream =
         flutterReactiveBle.subscribeToCharacteristic(_txCharacteristic);
@@ -69,7 +70,9 @@ class _RatationPageState extends State<RotaionPage> {
       // print(data.toString());
       var s = String.fromCharCodes(data).toString();
       var ss = data.toString();
-      if (ss == "[115, 115, 70, 105, 110, 105, 115, 104, 13, 10]") {
+      print("CHECK=$ss");
+      if ((ss.indexOf("115, 115, 70, 105, 110, 105, 115, 104") == 1) || (ss.indexOf("115, 24, 15, 22, 110, 105, 115, 104, 13, 10") == 1)){// แก้บีคปิด recievedata หน้า  device page ไม่ได้ ทำให้รับข้อมูลซ้อนกัน
+        //ssFinish
         // print("s1=ssFinish");
         waitSSFinish = false;
         refreshScreen();
@@ -99,8 +102,8 @@ class _RatationPageState extends State<RotaionPage> {
           var globalsMotorSpeed = globals.motorSpeed;
           _currentSliderValue = double.parse('$globalsMotorSpeed');
 
-          if (_currentSliderValue < 550) {
-            _currentSliderValue = 550;
+          if (_currentSliderValue < globals.motorMin) {
+            _currentSliderValue = globals.motorMin;
           }
         } on Exception catch (_) {
           print('Wrong Type Value.');
@@ -129,8 +132,8 @@ class _RatationPageState extends State<RotaionPage> {
   Widget build(BuildContext context) {
     // QualifiedCharacteristic args = ModalRoute.of(context).settings.arguments;
 
-    if (_currentSliderValue < 550) {
-      _currentSliderValue = 1000;
+    if (_currentSliderValue < globals.motorMin) {
+      _currentSliderValue = 40;
     }
 
     // print("_currentSliderValue=$_currentSliderValue");
@@ -238,13 +241,21 @@ class _RatationPageState extends State<RotaionPage> {
 
     return WillPopScope(
       onWillPop: () async {
+        print("onwillpop");
+
         if (!waitSSFinish) {
+          print("onwillpop2");
           Navigator.pop(context);
+          print("onwillpop4");
           Navigator.pop(context);
+
+          print("onwillpop5");
           return true;
         } else {
+          print("onwillpop6");
           return false;
         }
+
       },
       child: Scaffold(
         appBar: PreferredSize(
@@ -253,14 +264,15 @@ class _RatationPageState extends State<RotaionPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AppBar(
-                  automaticallyImplyLeading: false,
+                  automaticallyImplyLeading: true,
                   centerTitle: true,
                   // backgroundColor: Color(0xff444444),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.sync),
-                      Text("Rotaion"),
+                      Text("Rotation"),
                     ],
                   )),
             ],
@@ -284,8 +296,8 @@ class _RatationPageState extends State<RotaionPage> {
                       var tempSend = "93=$globalsMotorSpeed,";
 
                       _currentSliderValue = double.parse('$globalsMotorSpeed');
-                      if (_currentSliderValue < 550) {
-                        _currentSliderValue = 550;
+                      if (_currentSliderValue < globals.motorMin) {
+                        _currentSliderValue = globals.motorMin;
                       }
                       tempSpeed = _currentSliderValue;
                       _sendData(tempSend, globals.args);
@@ -328,8 +340,11 @@ class _RatationPageState extends State<RotaionPage> {
                     globals.rotation = true;
                     globals.motorStatus = "on";
                   } else {
+                    print("OFFFFFFFFFFFFFF");
                     _receiveData(globals.args);
-                    _sendData("7", globals.args);
+                    Future.delayed(const Duration(milliseconds: 1000), () {
+                      _sendData("7", globals.args);
+                    });
                     // _sendData("3z", args);
                     tempStatus = "Off";
                     globals.rotation = false;
@@ -381,7 +396,7 @@ class _RatationPageState extends State<RotaionPage> {
               title: Text("Speed"),
               subtitle: Row(
                 children: [
-                  Text((((_currentSliderValue - 550) / 3) / 10)
+                  Text((_currentSliderValue - globals.motorMin)
                       .round()
                       .toString()),
                   Expanded(
@@ -393,10 +408,10 @@ class _RatationPageState extends State<RotaionPage> {
                         ),
                         child: Slider(
                           value: _currentSliderValue,
-                          min: 550,
-                          max: 3550,
+                          min:  globals.motorMin,//20
+                          max: globals.motorMax,//120
                           divisions: 100,
-                          label: (((_currentSliderValue - 550) / 3) / 10)
+                          label: (_currentSliderValue - globals.motorMin)
                               .round()
                               .toString(),
                           onChanged: !globals.rotation

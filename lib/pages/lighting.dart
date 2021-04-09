@@ -126,7 +126,7 @@ class _LightingPageState extends State<LightingPage> {
           (xx != "[48, 48, 13, 10]") &&
           (xx != "[52, 48, 48, 13, 10]")) {
         // fix bug รับค่าเปล่าจากไหนไม่รู้
-        subscription.cancel();
+        // subscription.cancel();
         try {
           if (parts0[0] == "l") {
             // print("in1");
@@ -504,19 +504,23 @@ class _LightingPageState extends State<LightingPage> {
                 (index == 2) ||
                 (index == 4) ||
                 (index == 5) ||
+                (index == 6) || //random color
                 (index == 7) ||
                 (index == 8) ||
                 (index == 10) ||
                 (index == 11) ||
                 (index == 13) ||
                 (index == 14) ||
+                (index == 15) || //random color
                 (index == 16) ||
                 (index == 17) ||
                 (index == 19) ||
                 (index == 20) ||
                 (index == 22) ||
                 (index == 23) ||
+                (index == 24) || //random color
                 (index == 25) ||
+                (index == 27) || //random color
                 (index == 32) ||
                 (index == 34) ||
                 (index == 35) ||
@@ -552,7 +556,10 @@ class _LightingPageState extends State<LightingPage> {
                         // print(tempLighMode.toString());
                         _sendData(globals.modeSelect[index], globals.args);
                         refreshScreen();
-                        _sendData("2z", globals.args);
+                        Future.delayed(const Duration(milliseconds: 200), () {
+
+                          _sendData("2z", globals.args);
+                        });
 
                         globals.SM = globals.sm[index];
                         globals.radioBool = globals.radio[index];
@@ -622,11 +629,12 @@ class _LightingPageState extends State<LightingPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppBar(
-                    automaticallyImplyLeading: false,
+                    automaticallyImplyLeading: true,
                     centerTitle: true,
                     // backgroundColor: Color(0xff444444),
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.lightbulb_outline),
                         Text("Light"),
@@ -645,9 +653,11 @@ class _LightingPageState extends State<LightingPage> {
                   setState(() {
                     globals.statusLight = value;
                     if (globals.statusLight) {
+                      // globals.radioBool = globals.radio[index];
                       globals.tempStatus = "on";
                       globals.lightStatus = "on";
-
+                      print("555555");
+                      globals.statusLight = true;
                       (globals.lightModeNum == 0)
                           ? globals.lightModeNum = 1
                           : null;
@@ -660,15 +670,27 @@ class _LightingPageState extends State<LightingPage> {
                       globals.lightMode =
                           globals.modeNameList[globals.lightModeNum];
                       globals.SM = globals.sm[globals.lightModeNum];
-                      _sendData("2z", globals.args);
+                      Future.delayed(const Duration(milliseconds: 200), () {
+
+                        _sendData("2z", globals.args);
+                      });
                       // refreshScreen();
                     } else {
+                      globals.radioBool = false;
+                      globals.lightChoose = 1;
                       globals.tempStatus = "off";
                       globals.lightStatus = "off";
+                      globals.tempLighMode = 0;
                       print("DADA=${globals.tempLighMode}");
                       globals.lightModeNum = globals.tempLighMode;
+                      globals.statusLight = false;
                       _sendData("2l", globals.args);
-                      _sendData("2z", globals.args);
+
+                      Future.delayed(const Duration(milliseconds: 200), () {
+
+                        _sendData("2z", globals.args);
+                      });
+
                     }
                   });
                 },
@@ -718,6 +740,7 @@ class _LightingPageState extends State<LightingPage> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Radio(
+
                                     value: -1,
                                     groupValue: _value,
 

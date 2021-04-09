@@ -38,7 +38,7 @@ Color currentColor2 = Colors.white;
 Color currentColor3 = Colors.white;
 Color currentColor4 = Colors.white;
 
-bool statusLight = true;
+bool statusLight = false;
 String tempStatus = "on";
 bool statusLight1 = true;
 String tempStatus1 = "on";
@@ -165,8 +165,9 @@ List radio = [
   true //40
 ];
 
+
 List modeSelect = [
-  "Off", //0
+  "2l", //0
   "2q", //1
   "2F", //2
   "2G", //3
@@ -325,3 +326,6 @@ int lightSpeedValue = 0;
 
 // String showSMode;
 String subShowMode = "";
+
+double motorMin = 20;
+double motorMax = 120;

@@ -28,7 +28,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
-  flutter_reactive_ble: ^2.7.1
+  flutter_reactive_ble: ^3.0.0
   location_permissions: ^3.0.0+1
   flutter_easyloading: ^2.2.2
   flutter_colorpicker: ^0.3.5
@@ -38,7 +38,7 @@ dependencies:
   flutter_time_picker_spinner: ^1.0.6+1
   permission_handler: ^5.0.1+1
 #  system_setting: ^0.1.3 //build bug
-  app_settings: 4.0.4
+  app_settings: ^4.1.0
   scrollable_positioned_list: ^0.1.9
 
 
@@ -99,3 +99,10 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 module:
   androidX: true
+
+platforms:
+  android:
+    package: io.flutter.plugins.flutterauth0
+    pluginClass: FlutterAuth0Plugin
+  ios:
+    pluginClass: FlutterAuth0Plugin

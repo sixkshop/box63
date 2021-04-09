@@ -90,9 +90,10 @@ class _TimePageState extends State<TimePage> {
           var now = new DateTime.now();
           var nowHR = now.toString().substring(11, 13);
           var nowMI = now.toString().substring(14, 16);
+          var nowSE = now.toString().substring(17, 19);
           var nowWeekday = now.weekday;
-
-          _sendData("u$nowHR$nowMI$nowWeekday,", args);
+print("now.toString()");
+          _sendData("u$nowHR$nowMI$nowSE$nowWeekday,", args);
 
           print(now);
           print(nowWeekday);
@@ -155,9 +156,11 @@ class _TimePageState extends State<TimePage> {
       var now = new DateTime.now();
       var nowHR = now.toString().substring(11, 13);
       var nowMI = now.toString().substring(14, 16);
+      var nowSE = now.toString().substring(17, 19);
       var nowWeekday = now.weekday;
+      print("now.toString()");
 
-      _sendData("u$nowHR$nowMI$nowWeekday,", globals.args);
+      _sendData("u$nowHR$nowMI$nowSE$nowWeekday,", globals.args);
       firstSettime = false;
     }
 
@@ -253,11 +256,12 @@ class _TimePageState extends State<TimePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AppBar(
-                  automaticallyImplyLeading: false,
+                  automaticallyImplyLeading: true,
                   centerTitle: true,
                   // backgroundColor: Color(0xff444444),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.access_time_outlined),
                       Text("Time"),
