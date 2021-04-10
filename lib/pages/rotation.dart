@@ -290,7 +290,7 @@ class _RatationPageState extends State<RotaionPage> {
                   if (_status) {
                     if (globals.motorSpeed == "0") {
                       //ต้องแยกสองบรรทัดใส่ 93=1000,3d แล้ว bug
-                      globals.motorSpeed = "1000";
+                      globals.motorSpeed = "50";
                       print("XXX1");
                       var globalsMotorSpeed = globals.motorSpeed;
                       var tempSend = "93=$globalsMotorSpeed,";
