@@ -146,6 +146,7 @@ class _RatationPageState extends State<RotaionPage> {
       globals.tempRotation = globals.motorDirection;
       globals.rotation = true;
     } else {
+      _currentSliderValue = 40;//fix bug slider min
       _status = false;
       tempStatus = "off";
       // (globals.motorDirection=="-")? globals.motorDirection = "Clockwise":null;
@@ -290,12 +291,14 @@ class _RatationPageState extends State<RotaionPage> {
                   if (_status) {
                     if (globals.motorSpeed == "0") {
                       //ต้องแยกสองบรรทัดใส่ 93=1000,3d แล้ว bug
-                      globals.motorSpeed = "50";
+                      globals.motorSpeed = "40";
                       print("XXX1");
                       var globalsMotorSpeed = globals.motorSpeed;
-                      var tempSend = "93=$globalsMotorSpeed,";
+                      // var tempSend = "93=$globalsMotorSpeed,";
+                      var tempSend = "93=40,";
 
                       _currentSliderValue = double.parse('$globalsMotorSpeed');
+
                       if (_currentSliderValue < globals.motorMin) {
                         _currentSliderValue = globals.motorMin;
                       }
@@ -310,8 +313,9 @@ class _RatationPageState extends State<RotaionPage> {
                     } else {
                       if (tempSpeed == null) {
                         print("HERE2");
+                        globals.motorSpeed = "40";
                         var globalsMotorSpeed = globals.motorSpeed;
-                        _sendData("93=$globalsMotorSpeed,", globals.args);
+                        _sendData("93=40,", globals.args);
                         Future.delayed(const Duration(milliseconds: 200), () {
                           _sendData("3z", globals.args);
                         });

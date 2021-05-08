@@ -583,7 +583,7 @@ class _HomePageState extends State<HomePage> {
                                   style: TextStyle(
                                     color: Colors.grey,
                                   ))),
-                          Text("version:1.0.0",
+                          Text("version:1.0.6",
                               style: TextStyle(
                                 color: Colors.grey,
                                 fontSize: 10,
